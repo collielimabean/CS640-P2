@@ -1,10 +1,12 @@
 package edu.wisc.cs.sdn.vnet.rt;
 
+import java.util.Map;
+
 import edu.wisc.cs.sdn.vnet.Device;
 import edu.wisc.cs.sdn.vnet.DumpFile;
 import edu.wisc.cs.sdn.vnet.Iface;
-
 import net.floodlightcontroller.packet.Ethernet;
+import net.floodlightcontroller.packet.IPv4;
 
 /**
  * @author Aaron Gember-Jacobson and Anubhavnidhi Abhashkumar
@@ -82,10 +84,65 @@ public class Router extends Device
 		System.out.println("*** -> Received packet: " +
                 etherPacket.toString().replace("\n", "\n\t"));
 		
-		/********************************************************************/
-		/* TODO: Handle packets                                             */
+		// verify type 
+		if (etherPacket.getEtherType() != Ethernet.TYPE_IPv4)
+		{
+		    System.out.println("[Router] Dropped packet of type: " + etherPacket.getEtherType());
+		    return;
+		}
 		
+		// verify checksum 
+		IPv4 pkt = (IPv4) etherPacket.getPayload();
+		int pktSize = 4 * pkt.getHeaderLength(); // header length is # of words (32 bit)
+		short recvChecksum = pkt.getChecksum();
 		
-		/********************************************************************/
+		// redo checksum
+		pkt.setChecksum((short)0);
+		pkt.serialize();
+		short computedChecksum = pkt.getChecksum();
+		
+		if (computedChecksum != recvChecksum)
+		{
+		    System.out.println("[Router] Checksum error: received " + recvChecksum + ", computed " + computedChecksum);
+		    return;
+		}
+		
+		// verify TTL
+		if (pkt.getTtl() <= 1)
+		{
+		    System.out.println("[Router] Received pkt with TTL < 1. Dropping.");
+		    return;
+		}
+		
+		// update TTL & checksum
+		pkt.setTtl((byte)(pkt.getTtl() - 1));
+		pkt.setChecksum((short) 0);
+		pkt.serialize(); // probably not necessary
+		
+		// is the packet inbound on one of the router interfaces?
+		for (Map.Entry<String, Iface> ifaceEntry : this.interfaces.entrySet())
+		{
+		    if (ifaceEntry.getValue().getIpAddress() == pkt.getDestinationAddress())
+		    {
+		        System.out.println("[Router] Received pkt inbound on router interfaces. No forwarding required. Dropping.");
+		        return;
+		    }
+		}
+		
+		// forward packet to other routers
+		RouteEntry routeEntry = routeTable.lookup(pkt.getDestinationAddress());
+		if (routeEntry == null)
+		{
+		    System.out.println("[Router] No RouteEntry packet found, dropping packet.");
+		    return;
+		}
+		
+		// update ethernet packet MAC addresses
+		ArpEntry arpEntry = arpCache.lookup(routeEntry.getDestinationAddress());
+		etherPacket.setDestinationMACAddress(arpEntry.getMac().toBytes());
+		etherPacket.setSourceMACAddress(routeEntry.getInterface().getMacAddress().toBytes());
+		
+		// send packet
+		this.sendPacket(etherPacket, routeEntry.getInterface());
 	}
 }

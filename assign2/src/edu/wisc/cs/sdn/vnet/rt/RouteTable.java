@@ -37,12 +37,31 @@ public class RouteTable
 	{
 		synchronized(this.entries)
         {
-			/*****************************************************************/
-			/* TODO: Find the route entry with the longest prefix match      */
-			
-			return null;
-			
-			/*****************************************************************/
+		    int maxPrefix = -1;
+		    RouteEntry bestMatch = null;
+		    
+		    // just loop over bits lol
+		    for (RouteEntry e : entries)
+		    {
+	            for (int i = 31; i >= 0; i--)
+	            {
+	                int e_bit = e.getDestinationAddress() & (1 << i);
+	                int ip_bit = ip & (1 << i);
+	                
+	                if (e_bit != ip_bit)
+	                {
+	                    int prefix = 32 - i;
+	                    if (prefix > maxPrefix)
+	                    {
+	                        maxPrefix = prefix;
+	                        bestMatch = e;
+	                    }
+	                }
+	            }
+   		    }
+
+		    System.out.println("For " + ip + ": prefix = " + maxPrefix + " with RE: " + bestMatch.toString());
+			return bestMatch;
         }
 	}
 	
