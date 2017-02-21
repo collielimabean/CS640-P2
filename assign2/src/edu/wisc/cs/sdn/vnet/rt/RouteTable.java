@@ -40,7 +40,7 @@ public class RouteTable
 		    int maxPrefix = -1;
 		    RouteEntry bestMatch = null;
 		    
-		    // just loop over bits lol
+		    // just loop over bits
 		    for (RouteEntry e : entries)
 		    {
 	            for (int i = 31; i >= 0; i--)
@@ -56,6 +56,8 @@ public class RouteTable
 	                        maxPrefix = prefix;
 	                        bestMatch = e;
 	                    }
+	                    
+	                    break;
 	                }
 	            }
    		    }
