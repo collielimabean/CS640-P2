@@ -71,7 +71,7 @@ public class Switch extends Device implements Runnable
         // no, we don't - so broadcast
         for (Iface iface : this.interfaces.values())
         {
-            if (!inIface.equals(iface))
+            if (!inIface.getName().equals(iface.getName()))
                 this.sendPacket(etherPacket, iface);
         }
         
