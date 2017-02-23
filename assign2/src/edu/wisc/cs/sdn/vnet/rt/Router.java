@@ -93,11 +93,10 @@ public class Router extends Device
 		
 		// verify checksum 
 		IPv4 pkt = (IPv4) etherPacket.getPayload();
-		int pktSize = 4 * pkt.getHeaderLength(); // header length is # of words (32 bit)
 		short recvChecksum = pkt.getChecksum();
 		
 		// redo checksum
-		pkt.setChecksum((short)0);
+		pkt.resetChecksum();
 		pkt.serialize();
 		short computedChecksum = pkt.getChecksum();
 		
@@ -110,13 +109,13 @@ public class Router extends Device
 		// verify TTL
 		if (pkt.getTtl() <= 1)
 		{
-		    System.out.println("[Router] Received pkt with TTL < 1. Dropping.");
+		    System.out.println("[Router] Received pkt with TTL <= 1. Dropping.");
 		    return;
 		}
 		
 		// update TTL & checksum
 		pkt.setTtl((byte)(pkt.getTtl() - 1));
-		pkt.setChecksum((short) 0);
+		pkt.resetChecksum();
 		pkt.serialize(); // probably not necessary
 		
 		// is the packet inbound on one of the router interfaces?
@@ -124,7 +123,10 @@ public class Router extends Device
 		{
 		    if (ifaceEntry.getValue().getIpAddress() == pkt.getDestinationAddress())
 		    {
-		        System.out.println("[Router] Received pkt inbound on router interfaces. No forwarding required. Dropping.");
+		        System.out.println("[Router] Received pkt inbound on router interfaces.");
+		        System.out.println("Sent to IP: " + IPv4.fromIPv4Address(ifaceEntry.getValue().getIpAddress()) + " | MAC: " + ifaceEntry.getValue().getMacAddress());
+		        etherPacket.setDestinationMACAddress(ifaceEntry.getValue().getMacAddress().toBytes());
+		        this.sendPacket(etherPacket, ifaceEntry.getValue());
 		        return;
 		    }
 		}
@@ -133,12 +135,14 @@ public class Router extends Device
 		RouteEntry routeEntry = routeTable.lookup(pkt.getDestinationAddress());
 		if (routeEntry == null)
 		{
-		    System.out.println("[Router] No RouteEntry packet found, dropping packet.");
+		    System.out.println("[Router] No RouteEntry found, dropping packet.");
 		    return;
 		}
 		
 		// update ethernet packet MAC addresses
-		ArpEntry arpEntry = arpCache.lookup(routeEntry.getDestinationAddress());
+		System.out.println("[Router] ARP Lookup input: " + IPv4.fromIPv4Address(routeEntry.getGatewayAddress()));
+		ArpEntry arpEntry = arpCache.lookup(routeEntry.getGatewayAddress());
+		System.out.println("[Router] ARP Lookup: " + arpEntry);
 		etherPacket.setDestinationMACAddress(arpEntry.getMac().toBytes());
 		etherPacket.setSourceMACAddress(routeEntry.getInterface().getMacAddress().toBytes());
 		
