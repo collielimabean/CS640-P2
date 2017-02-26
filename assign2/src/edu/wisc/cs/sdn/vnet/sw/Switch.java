@@ -51,7 +51,7 @@ public class Switch extends Device implements Runnable
      */
     public void handlePacket(Ethernet etherPacket, Iface inIface)
     {
-        //System.out.println("*** -> Received packet: " + etherPacket.toString().replace("\n", "\n\t"));
+        System.out.println("*** -> Received packet: " + etherPacket.toString().replace("\n", "\n\t"));
 
         /* TODO: Handle packets */
         // First, add to source MAC & interface to table

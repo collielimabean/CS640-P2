@@ -49,10 +49,10 @@ public class Router extends Device
             System.exit(1);
         }
         
-        //System.out.println("Loaded static route table");
-        //System.out.println("-------------------------------------------------");
-        //System.out.print(this.routeTable.toString());
-        //System.out.println("-------------------------------------------------");
+        System.out.println("Loaded static route table");
+        System.out.println("-------------------------------------------------");
+        System.out.print(this.routeTable.toString());
+        System.out.println("-------------------------------------------------");
     }
     
     /**
@@ -68,10 +68,10 @@ public class Router extends Device
             System.exit(1);
         }
         
-        //System.out.println("Loaded static ARP cache");
-        //System.out.println("----------------------------------");
-        //System.out.print(this.arpCache.toString());
-        //System.out.println("----------------------------------");
+        System.out.println("Loaded static ARP cache");
+        System.out.println("----------------------------------");
+        System.out.print(this.arpCache.toString());
+        System.out.println("----------------------------------");
     }
 
     /**
@@ -81,8 +81,8 @@ public class Router extends Device
      */
     public void handlePacket(Ethernet etherPacket, Iface inIface)
     {
-        //System.out.println("*** -> Received packet: " +
-        //        etherPacket.toString().replace("\n", "\n\t"));
+        System.out.println("*** -> Received packet: " +
+                etherPacket.toString().replace("\n", "\n\t"));
         
         // verify type 
         if (etherPacket.getEtherType() != Ethernet.TYPE_IPv4)
