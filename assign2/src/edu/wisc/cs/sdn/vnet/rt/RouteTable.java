@@ -62,7 +62,7 @@ public class RouteTable
 	            }
    		    }
 
-		    System.out.println("[RouteEntry] IP: " + IPv4.fromIPv4Address(ip) + ": prefix = " + maxPrefix + " with RouteEntry: " + bestMatch.toString());
+		    //System.out.println("[RouteEntry] IP: " + IPv4.fromIPv4Address(ip) + ": prefix = " + maxPrefix + " with RouteEntry: " + bestMatch.toString());
 			return bestMatch;
         }
 	}

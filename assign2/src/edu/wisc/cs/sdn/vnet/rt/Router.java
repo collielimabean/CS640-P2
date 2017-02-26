@@ -44,15 +44,15 @@ public class Router extends Device
     {
         if (!routeTable.load(routeTableFile, this))
         {
-            System.err.println("Error setting up routing table from file "
-                    + routeTableFile);
+            //System.err.println("Error setting up routing table from file "
+            //        + routeTableFile);
             System.exit(1);
         }
         
-        System.out.println("Loaded static route table");
-        System.out.println("-------------------------------------------------");
-        System.out.print(this.routeTable.toString());
-        System.out.println("-------------------------------------------------");
+        //System.out.println("Loaded static route table");
+        //System.out.println("-------------------------------------------------");
+        //System.out.print(this.routeTable.toString());
+        //System.out.println("-------------------------------------------------");
     }
     
     /**
@@ -63,15 +63,15 @@ public class Router extends Device
     {
         if (!arpCache.load(arpCacheFile))
         {
-            System.err.println("Error setting up ARP cache from file "
-                    + arpCacheFile);
+            //System.err.println("Error setting up ARP cache from file "
+            //        + arpCacheFile);
             System.exit(1);
         }
         
-        System.out.println("Loaded static ARP cache");
-        System.out.println("----------------------------------");
-        System.out.print(this.arpCache.toString());
-        System.out.println("----------------------------------");
+        //System.out.println("Loaded static ARP cache");
+        //System.out.println("----------------------------------");
+        //System.out.print(this.arpCache.toString());
+        //System.out.println("----------------------------------");
     }
 
     /**
@@ -81,13 +81,13 @@ public class Router extends Device
      */
     public void handlePacket(Ethernet etherPacket, Iface inIface)
     {
-        System.out.println("*** -> Received packet: " +
-                etherPacket.toString().replace("\n", "\n\t"));
+        //System.out.println("*** -> Received packet: " +
+        //        etherPacket.toString().replace("\n", "\n\t"));
         
         // verify type 
         if (etherPacket.getEtherType() != Ethernet.TYPE_IPv4)
         {
-            System.out.println("[Router] Dropped packet of type: " + etherPacket.getEtherType());
+            //System.out.println("[Router] Dropped packet of type: " + etherPacket.getEtherType());
             return;
         }
         
@@ -102,14 +102,14 @@ public class Router extends Device
         
         if (computedChecksum != recvChecksum)
         {
-            System.out.println("[Router] Checksum error: received " + recvChecksum + ", computed " + computedChecksum);
+            //System.out.println("[Router] Checksum error: received " + recvChecksum + ", computed " + computedChecksum);
             return;
         }
         
         // verify TTL
         if (pkt.getTtl() <= 1)
         {
-            System.out.println("[Router] Received pkt with TTL <= 1. Dropping.");
+            //System.out.println("[Router] Received pkt with TTL <= 1. Dropping.");
             return;
         }
         
@@ -123,7 +123,7 @@ public class Router extends Device
         {
             if (ifaceEntry.getValue().getIpAddress() == pkt.getDestinationAddress())
             {
-                System.out.println("[Router] Received pkt inbound on router interfaces, dropped.");
+                //System.out.println("[Router] Received pkt inbound on router interfaces, dropped.");
                 return;
             }
         }
@@ -132,12 +132,12 @@ public class Router extends Device
         RouteEntry routeEntry = routeTable.lookup(pkt.getDestinationAddress());
         if (routeEntry == null)
         {
-            System.out.println("[Router] No RouteEntry found, dropping packet.");
+            //System.out.println("[Router] No RouteEntry found, dropping packet.");
             return;
         }
         
         // update ethernet packet MAC addresses
-        System.out.println("[Router] ARP Lookup input: " + IPv4.fromIPv4Address(routeEntry.getGatewayAddress()));
+        //System.out.println("[Router] ARP Lookup input: " + IPv4.fromIPv4Address(routeEntry.getGatewayAddress()));
         ArpEntry arpEntry = arpCache.lookup(routeEntry.getGatewayAddress());
         if (arpEntry == null)
         {
@@ -146,12 +146,12 @@ public class Router extends Device
             if (arpEntry == null)
             {
                 // I guess not
-                System.out.println("[Router] 2nd ARP Lookup failed, dropping.");
+                //System.out.println("[Router] 2nd ARP Lookup failed, dropping.");
                 return;
             }
-            System.out.println("[Router] #2 ARP Lookup: " + IPv4.fromIPv4Address(pkt.getDestinationAddress()));
+            //System.out.println("[Router] #2 ARP Lookup: " + IPv4.fromIPv4Address(pkt.getDestinationAddress()));
         }
-        System.out.println("[Router] ARP Lookup: " + arpEntry);
+        //System.out.println("[Router] ARP Lookup: " + arpEntry);
         etherPacket.setDestinationMACAddress(arpEntry.getMac().toBytes());
         etherPacket.setSourceMACAddress(routeEntry.getInterface().getMacAddress().toBytes());
         
