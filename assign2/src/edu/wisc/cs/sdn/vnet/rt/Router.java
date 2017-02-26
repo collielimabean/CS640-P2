@@ -44,8 +44,8 @@ public class Router extends Device
     {
         if (!routeTable.load(routeTableFile, this))
         {
-            //System.err.println("Error setting up routing table from file "
-            //        + routeTableFile);
+            System.err.println("Error setting up routing table from file "
+                    + routeTableFile);
             System.exit(1);
         }
         
@@ -63,8 +63,8 @@ public class Router extends Device
     {
         if (!arpCache.load(arpCacheFile))
         {
-            //System.err.println("Error setting up ARP cache from file "
-            //        + arpCacheFile);
+            System.err.println("Error setting up ARP cache from file "
+                    + arpCacheFile);
             System.exit(1);
         }
         
