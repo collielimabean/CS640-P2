@@ -1,6 +1,21 @@
 #!/bin/bash
 
-java -jar VirtualNetwork.jar -v r1 -r rtable.r1 -a arp_cache &
-#java -jar VirtualNetwork.jar -v r2 -r rtable.r2 -a arp_cache &
-java -jar VirtualNetwork.jar -v s1  &
+pkill java
 
+for var in "$@"
+do
+    if [[ $var =~ r[1-9]+ ]] ; then 
+        echo Starting router: $var\n 
+        java -jar VirtualNetwork.jar -v $var -r rtable.$var -a arp_cache &
+        sleep 2
+    fi
+
+    if [[ $var =~ s[1-9]+ ]] ; then
+        echo Starting switch: $var
+        java -jar VirtualNetwork.jar -v $var &
+        sleep 2
+    fi  
+done
+
+
+echo Setup complete!
